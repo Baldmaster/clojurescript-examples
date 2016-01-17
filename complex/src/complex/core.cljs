@@ -3,7 +3,22 @@
 
 (enable-console-print!)
 
-(deftype Complex [real im])
+
+(defprotocol Show
+  (show [x] "Show something"))
+
+(defprotocol Complex-Number
+  (add [a b] "Complex numbers addition")
+  (subtr [a b] "Complex numbers subtraction"))
+
+(deftype Complex [real im]
+  Complex-Number
+  (add [a b] () (Complex.
+                 (+ real (.-real b))
+                 (+ im   (.-im b))))
+  (subtr [a b] () (Complex.
+                    (- real (.-real b))
+                    (- im   (.-im b)))))
 
 ;; Define getters, equivalent to this js code:
 ;; Complex.prototype.getSmth = function () { return this.smth };
