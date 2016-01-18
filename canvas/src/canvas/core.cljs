@@ -1,21 +1,42 @@
-(ns canvas.core
-  (:require [monet.canvas :as canvas]))
+(ns canvas.core)
 
 (enable-console-print!)
 
 (def canvas-dom (.getElementById js/document "myCanvas"))
 
-(def monet-canvas (canvas/init canvas-dom "2d"))
+(def width (.-width canvas-dom))
 
+(def ctx (.getContext canvas-dom "2d"))
 
-(canvas/add-entity monet-canvas :background
-                   (canvas/entity {:x 0 :y 0 :w 100 :h 100}
-                                  nil
-                                  (fn [ctx val]
-                                    (-> ctx
-                                        (canvas/fill-style "#123456")
-                                        (canvas/fill-rect val)))))
+(defn deg-to-rad
+  [n]
+  (* (/ Math/PI 180) n))
 
+(defn sine-coord
+  [x]
+  (let [sin (Math/sin (deg-to-rad x))
+        y (- 100 (* sin 90))]
+    {:x x :y y}))
+
+(defn fill-rect
+  [x y colour]
+  (set! (.-fillStyle ctx) colour)
+  (.fillRect ctx x y 2 2))
+
+(fill-rect 10 10 "#345666")
+
+(def x-coords (iterate inc 0))
+
+(defn draw-sine
+  [color]
+  (->> x-coords
+     (take width)
+     (map sine-coord)
+     (map (fn [{:keys [x y]}]
+            (fill-rect x y color)))
+     (doall)))
+
+(draw-sine "#232323")
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
