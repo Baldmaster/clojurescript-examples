@@ -1,38 +1,66 @@
 (ns async.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.core.async
              :as a
              :refer [>! <! chan buffer close! put!
                      alts! timeout]]))
-
 (enable-console-print!)
 
+(def canvas (.getElementById js/document "myCanvas"))
 
-(defn upper-caser
-  [in]
-  (let [out (chan)]
-    (go (while true (>! out (clojure.string/upper-case (<! in)))))
-    out))
+(def ctx (.getContext canvas "2d"))
 
-(defn reverser
-  [in]
-  (let [out (chan)]
-    (go (while true (>! out (clojure.string/reverse (<! in)))))
-    out))
+(def h (.-height canvas))
 
-(defn printer
-  [in]
-  (go (while true (println (<! in)))))
+(def w (.-width canvas))
+
+(def center [(quot w 2) (quot h 2)])
+
+(def k 1)
+
+;;(.beginPath ctx)
+
+;;(let [[x y] center]
+;;  (. ctx (moveTo x y)))
+
+(defn spiral-point
+  [n j k]
+  (let [[cx cy] center
+        phi (* n j)
+        r (* k n)
+        x (+ 300 (* r (Math/cos phi)))
+        y (+ 300 (* r (Math/sin phi)))]
+    [x y]))
 
 
-(def in-chan (chan))
-(def upper-caser-out (upper-caser in-chan))
-(def reverser-out (reverser upper-caser-out))
-(printer reverser-out)
+(defn coll->chan [coll]
+  (let [ch (chan)]
+    (go
+      (loop [coll coll]
+        (when-let [data (first coll)]
+          (<! (timeout 10))
+          (>! ch data)
+          (recur (rest coll))))
+      (close! ch))
+    ch))
 
-(go (>! in-chan " ,olleH"))
-(go (>! in-chan "!dlrow"))
+(def points (map spiral-point (iterate #(+ % 0.04) 0) (repeat 0.9) (repeat 11)))
 
+(defn fill-dot
+  [x y]
+  (do
+    (.beginPath ctx)
+    (. ctx (arc x y 5 0 (* 2 Math/PI) false))
+    (set! (.-fillStyle ctx) "green")
+    (.fill ctx)
+    (set! (.-strokeStyle ctx) "green")
+    (.stroke ctx)))
+
+(let [data-chan (coll->chan (take 700 points))]
+  (go-loop []
+    (when-let [[x y] (<! data-chan)]
+      (fill-dot x y)
+      (recur))))
 
 (defn on-js-reload []
 )
