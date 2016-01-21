@@ -2,6 +2,14 @@
 
 ## Emacs [CIDER](https://github.com/clojure-emacs/cider) [ready](https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl#setting-up-cider)
 
+## Compile
+
+    lein cljsbuild once node
+
+## Try with node
+
+    node out/fibo.js 10 //=> 55
+
 ## Basic setup
 
 To get an interactive development environment run:
