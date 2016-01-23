@@ -1,4 +1,4 @@
-(defproject phisics "0.1.0-SNAPSHOT"
+(defproject physics "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -27,11 +27,11 @@
               [{:id "dev"
                 :source-paths ["src"]
 
-                :figwheel {:on-jsload "phisics.core/on-js-reload"}
+                :figwheel {:on-jsload "physics.core/on-js-reload"}
 
-                :compiler {:main phisics.core
+                :compiler {:main physics.core
                            :asset-path "js/compiled/out"
-                           :output-to "resources/public/js/compiled/phisics.js"
+                           :output-to "resources/public/js/compiled/physics.js"
                            :output-dir "resources/public/js/compiled/out"
                            :source-map-timestamp true}}
                ;; This next build is an compressed minified build for
@@ -39,8 +39,8 @@
                ;; lein cljsbuild once min
                {:id "min"
                 :source-paths ["src"]
-                :compiler {:output-to "resources/public/js/compiled/phisics.js"
-                           :main phisics.core
+                :compiler {:output-to "resources/public/js/compiled/physics.js"
+                           :main physics.core
                            :optimizations :advanced
                            :pretty-print false}}]}
 
