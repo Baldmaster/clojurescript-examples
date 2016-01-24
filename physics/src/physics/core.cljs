@@ -55,11 +55,13 @@
              
       (draw x' y')))))
 
-(defn start
+(defn render
   []
-  (js/setInterval move (/ 1000 60)))
+  (do
+    (. js/window (requestAnimationFrame render))
+    (move)))
 
-(start)
+(render)
 
 
 
