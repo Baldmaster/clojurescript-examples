@@ -61,12 +61,13 @@
 (defn move-ball!
   [ball]
   (let [{:keys [x y vx vy radius]} ball
-        [y' vy'] (if (> (+ y vy g) (- height radius))
-                   [(- height radius) (* (+ vy g) -0.98)]
-                   [(+ y vy g) (+ vy g)])
-        x' (if (> (+ x vx) (+ width radius))
-             (* -2 radius)
-             (+ x vx))]
+        dy (+ vy g)
+        [y' vy'] (if (> (+ y dy) (- height radius))
+                   [(- height radius) (* dy -0.98)]
+                   [(+ y dy) dy])
+         x' (if (> (+ x vx) (+ width radius))
+              (* -2 radius)
+              (+ x vx))]
     (do
       (set! (.-x ball) x')
       (set! (.-y ball) y')
