@@ -55,7 +55,7 @@
                                y (random-value 0 height)
                                vx (random-value 1 10)
                                radius (random-value 10 30)]
-                           (b/new-ball x y :vx 3 :radius radius))))
+                           (b/new-ball x y :vx vx :radius radius))))
 
 
 (defn move-ball!
@@ -91,7 +91,7 @@
   []
   (do
     (. js/window (requestAnimationFrame render))
-    (render! (take 100 balls))))
+    (render! (take 300 balls))))
 
 (render)
 
