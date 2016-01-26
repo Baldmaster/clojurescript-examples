@@ -1,5 +1,7 @@
 (ns physics.core
-  (:require [goog.Timer :as Timer]))
+  (:require
+   [physics.ball :as b]
+   [goog.Timer :as Timer]))
 
 (enable-console-print!)
 
@@ -24,7 +26,7 @@
 (def state (atom
             {:x 200
              :y 200
-             :vx 2
+             :vx 0
              :vy 0}))
 
 (defn draw
@@ -37,9 +39,28 @@
    (. ctx (closePath))
    (. ctx (fill))))
 
-(defn move
-  []
-  (let [{:keys [x y vx vy]} @state
+
+(def ball (b/new-ball 300 300 :vx 3))
+
+
+(defn random-value
+  ([] (Math/round (Math/random)))
+  ([from] (Math/round (+ (Math/random) from)))
+  ([from to] (Math/round (-> (Math/random)
+                             (* (- to from))
+                             (+ from)))))
+
+
+(def balls (repeatedly #(let [x (random-value 0 width)
+                               y (random-value 0 height)
+                               vx (random-value 1 10)
+                               radius (random-value 10 30)]
+                           (b/new-ball x y :vx 3 :radius radius))))
+
+
+(defn move-ball!
+  [ball]
+  (let [{:keys [x y vx vy radius]} ball
         [y' vy'] (if (> (+ y vy g) (- height radius))
                    [(- height radius) (* (+ vy g) -0.98)]
                    [(+ y vy g) (+ vy g)])
@@ -47,25 +68,32 @@
              (* -2 radius)
              (+ x vx))]
     (do
-      (swap! state
-             assoc
-             :vy vy'
-             :x  x'
-             :y  y'
-             
-      (draw x' y')))))
+      (set! (.-x ball) x')
+      (set! (.-y ball) y')
+      (set! (.-vy ball) vy'))))
+
+(defn move!
+  [ball]
+  (do
+    ;;(. ctx (clearRect 0 0 width height))
+    (move-ball! ball)
+    (b/draw ball ctx)))
+
+
+(defn render!
+  [coll]
+  (do
+    (. ctx (clearRect 0 0 width height))
+    (-> (map #(move! %) coll)
+        (dorun))))
 
 (defn render
   []
   (do
     (. js/window (requestAnimationFrame render))
-    (move)))
+    (render! (take 100 balls))))
 
 (render)
-
-
-
-
 
 
 (defn on-js-reload []
