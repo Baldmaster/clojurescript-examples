@@ -1,5 +1,6 @@
 (ns physics.core
   (:require
+   [physics.protocols :as p]
    [physics.ball :as b]
    [goog.Timer :as Timer]))
 
@@ -78,7 +79,8 @@
   (do
     ;;(. ctx (clearRect 0 0 width height))
     (move-ball! ball)
-    (b/draw ball ctx)))
+    ;;(p/draw ball ctx)
+    (. ball (draw ctx))))
 
 
 (defn render!
@@ -92,7 +94,7 @@
   []
   (do
     (. js/window (requestAnimationFrame render))
-    (render! (take 300 balls))))
+    (render! (take 100 balls))))
 
 (render)
 
