@@ -24,24 +24,20 @@
 
 (def y 200)
 
-(def state (atom
-            {:x 200
-             :y 200
-             :vx 0
-             :vy 0}))
+(. canvas (setAttribute "data-frameId" nil))
 
-(defn draw
-  [x y]
-  (do
-   (. ctx (clearRect 0 0 width height))
-   (set! (.-fillStyle ctx) color)
-   (. ctx (beginPath))
-   (. ctx (arc x y radius 0 (* 2 Math/PI) true))
-   (. ctx (closePath))
-   (. ctx (fill))))
+(defn get-frame-id
+  []
+  (. canvas (getAttribute "data-frameId")))
 
-
-(def ball (b/new-ball 300 300 :vx 3))
+(. canvas (addEventListener "click"
+                            (fn []
+                              (let [fid (get-frame-id)]
+                               (if (= "null" fid)
+                                 (render)
+                                 (do
+                                   (. js/window (cancelAnimationFrame fid))
+                                   (.setAttribute canvas "data-frameId" nil)))))))
 
 
 (defn random-value
@@ -56,47 +52,29 @@
                                y (random-value 0 height)
                                vx (random-value 1 10)
                                radius (random-value 10 30)]
-                           (b/new-ball x y :vx vx :radius radius))))
+                          (b/new-ball x y :vx vx :radius radius))))
 
+(def entities (take 100 balls))
 
-(defn move-ball!
-  [ball]
-  (let [{:keys [x y vx vy radius]} ball
-        dy (+ vy g)
-        [y' vy'] (if (> (+ y dy) (- height radius))
-                   [(- height radius) (* dy -0.98)]
-                   [(+ y dy) dy])
-         x' (if (> (+ x vx) (+ width radius))
-              (* -2 radius)
-              (+ x vx))]
-    (do
-      (set! (.-x ball) x')
-      (set! (.-y ball) y')
-      (set! (.-vy ball) vy'))))
-
-(defn move!
-  [ball]
+(defn move-and-draw!
+  [entity]
   (do
-    ;;(. ctx (clearRect 0 0 width height))
-    (move-ball! ball)
-    ;;(p/draw ball ctx)
-    (. ball (draw ctx))))
-
+    (p/move entity width height)
+    (. entity (draw ctx))))
 
 (defn render!
   [coll]
   (do
     (. ctx (clearRect 0 0 width height))
-    (-> (map #(move! %) coll)
+    (-> (map #(move-and-draw! %) coll)
         (dorun))))
 
 (defn render
   []
   (do
-    (. js/window (requestAnimationFrame render))
-    (render! (take 100 balls))))
-
-(render)
+    (render! entities)
+    (->> (. js/window (requestAnimationFrame render))
+         (.setAttribute canvas "data-frameId"))))
 
 
 (defn on-js-reload []

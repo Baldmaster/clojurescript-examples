@@ -1,5 +1,6 @@
 (ns physics.ball
-  (:require [physics.protocols :as p]))
+  (:require [physics.protocols :as p]
+            [physics.constants :as const]))
 
 ;;(defprotocol Draw
 ;;  "Draw something"
@@ -14,8 +15,23 @@
       (. ctx (beginPath))
       (. ctx (arc x y radius 0 (* 2 Math/PI) true))
       (. ctx (closePath))
-      (. ctx (fill)))))
+      (. ctx (fill))))
+  p/Kinematics
+  (p/move
+    [ball width height]
+    (let [dy (+ vy const/g)
+        [y' vy'] (if (> (+ y dy) (- height radius))
+                   [(- height radius) (* dy -0.98)]
+                   [(+ y dy) dy])
+         x' (if (> (+ x vx) (+ width radius))
+              (* -2 radius)
+              (+ x vx))]
+    (do
+      (set! (.-x ball) x')
+      (set! (.-y ball) y')
+      (set! (.-vy ball) vy')))))
 
+;;Add prototype function
 (set! (.. Ball -prototype -draw)
       (fn [ctx]
         (this-as this (p/draw this ctx))))
