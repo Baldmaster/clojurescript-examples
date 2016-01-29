@@ -26,10 +26,7 @@
          x' (if (> (+ x vx) (+ width radius))
               (* -2 radius)
               (+ x vx))]
-    (do
-      (set! (.-x ball) x')
-      (set! (.-y ball) y')
-      (set! (.-vy ball) vy')))))
+    (assoc ball :x x' :y y' :vy vy'))))
 
 ;;Add prototype function
 (set! (.. Ball -prototype -draw)

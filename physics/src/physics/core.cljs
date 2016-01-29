@@ -17,24 +17,12 @@
 (def y 200)
 (def frame-id (atom nil))
 
-;;(. canvas (setAttribute "data-frameId" nil))
-
-(. canvas (addEventListener "click"
-                            (fn []
-                               (if (nil? @frame-id)
-                                 (render)
-                                 (do
-                                   (. js/window (cancelAnimationFrame @frame-id))
-                                   (reset! frame-id  nil))))))
-
-
 (defn random-value
   ([] (Math/round (Math/random)))
   ([from] (Math/round (+ (Math/random) from)))
   ([from to] (Math/round (-> (Math/random)
                              (* (- to from))
                              (+ from)))))
-
 
 (def balls (repeatedly #(let [x (random-value 0 width)
                                y (random-value 0 height)
@@ -44,25 +32,34 @@
 
 (def entities (take 100 balls))
 
-(defn move-and-draw!
+(. canvas (addEventListener "click"
+                            (fn []
+                              (if (nil? @frame-id)
+                                (animate entities)
+                                (do
+                                  (. js/window (cancelAnimationFrame @frame-id))
+                                  (reset! frame-id  nil))))))
+
+
+(defn draw!
   [entity]
-  (do
-    (p/move entity width height)
-    (. entity (draw ctx))))
+  (. entity (draw ctx)))
 
 (defn render!
   [coll]
   (do
     (. ctx (clearRect 0 0 width height))
-    (-> (map #(move-and-draw! %) coll)
-        (dorun))))
+    (doseq [entity coll]
+        (.draw entity ctx))))
 
-(defn render
-  []
-  (do
-    (render! entities)
-    (->> (. js/window (requestAnimationFrame render))
-         (reset! frame-id))))
+(defn animate [entities]
+  (letfn [(loop [state]
+            (fn []
+              (->>
+               (. js/window requestAnimationFrame (loop (map #(p/move % width height) state)))
+               (reset! frame-id))
+              (render! state)))]
+    ((loop entities))))
 
 
 (defn on-js-reload []
