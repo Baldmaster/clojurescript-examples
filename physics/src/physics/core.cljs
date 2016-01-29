@@ -7,37 +7,25 @@
 (enable-console-print!)
 
 (def canvas (. js/document (getElementById "myCanvas")))
-
 (def ctx (. canvas (getContext "2d")))
-
 (def width (.-width canvas))
-
 (def height (.-height canvas))
-
 (def radius 25)
-
 (def color "#0055ff")
-
 (def g 0.1)
-
 (def x 200)
-
 (def y 200)
+(def frame-id (atom nil))
 
-(. canvas (setAttribute "data-frameId" nil))
-
-(defn get-frame-id
-  []
-  (. canvas (getAttribute "data-frameId")))
+;;(. canvas (setAttribute "data-frameId" nil))
 
 (. canvas (addEventListener "click"
                             (fn []
-                              (let [fid (get-frame-id)]
-                               (if (= "null" fid)
+                               (if (nil? @frame-id)
                                  (render)
                                  (do
-                                   (. js/window (cancelAnimationFrame fid))
-                                   (.setAttribute canvas "data-frameId" nil)))))))
+                                   (. js/window (cancelAnimationFrame @frame-id))
+                                   (reset! frame-id  nil))))))
 
 
 (defn random-value
@@ -74,7 +62,7 @@
   (do
     (render! entities)
     (->> (. js/window (requestAnimationFrame render))
-         (.setAttribute canvas "data-frameId"))))
+         (reset! frame-id))))
 
 
 (defn on-js-reload []
