@@ -15,7 +15,7 @@
 (def g 0.1)
 (def x 200)
 (def y 200)
-(def frame-id (atom nil))
+;;(def frame-id (atom nil))
 
 (defn random-value
   ([] (Math/round (Math/random)))
@@ -33,12 +33,13 @@
 (def entities (take 100 balls))
 
 (. canvas (addEventListener "click"
-                            (fn []
+                            ((fn [frame-id]
+                                (fn []
                               (if (nil? @frame-id)
-                                (animate entities)
+                                (animate entities frame-id)
                                 (do
                                   (. js/window (cancelAnimationFrame @frame-id))
-                                  (reset! frame-id  nil))))))
+                                  (reset! frame-id  nil))))) (atom nil))))
 
 
 (defn draw!
@@ -52,7 +53,7 @@
     (doseq [entity coll]
         (.draw entity ctx))))
 
-(defn animate [entities]
+(defn animate [entities frame-id]
   (letfn [(loop [state]
             (fn []
               (->>
