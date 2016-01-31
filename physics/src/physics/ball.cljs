@@ -29,9 +29,9 @@
     (assoc ball :x x' :y y' :vy vy'))))
 
 ;;Add prototype function
-(set! (.. Ball -prototype -draw)
-      (fn [ctx]
-        (this-as this (p/draw this ctx))))
+;;(set! (.. Ball -prototype -draw)
+;;      (fn [ctx]
+;;        (this-as this (p/draw this ctx))))
 
 (defn new-ball
   [x y & {:keys [vx vy radius color]

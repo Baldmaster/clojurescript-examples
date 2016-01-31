@@ -32,32 +32,34 @@
 
 (def entities (take 100 balls))
 
-(. canvas (addEventListener "click"
-                            ((fn [frame-id]
-                                (fn []
-                              (if (nil? @frame-id)
-                                (animate entities frame-id)
-                                (do
-                                  (. js/window (cancelAnimationFrame @frame-id))
-                                  (reset! frame-id  nil))))) (atom nil))))
+(. canvas
+   (addEventListener "click"
+                     ((fn [frame-id]
+                        (fn []
+                          (if (nil? @frame-id)
+                            (animate entities frame-id)
+                            (do
+                              (. js/window (cancelAnimationFrame @frame-id))
+                              (reset! frame-id  nil))))) (atom nil))))
 
 
 (defn draw!
   [entity]
-  (. entity (draw ctx)))
+  (p/draw entity ctx))
 
 (defn render!
-  [coll]
+  [coll]x
   (do
     (. ctx (clearRect 0 0 width height))
     (doseq [entity coll]
-        (.draw entity ctx))))
+      (.draw entity ctx))))
 
 (defn animate [entities frame-id]
   (letfn [(loop [state]
             (fn []
               (->>
-               (. js/window requestAnimationFrame (loop (map #(p/move % width height) state)))
+               (. js/window requestAnimationFrame
+                  (loop (map #(p/move % width height) state)))
                (reset! frame-id))
               (render! state)))]
     ((loop entities))))
