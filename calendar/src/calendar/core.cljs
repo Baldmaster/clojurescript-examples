@@ -3,20 +3,27 @@
 
 (enable-console-print!)
 
-(def days-in-month {:0 31
-                    :1 28
-                    :2 31
-                    :3 30
-                    :4 31
-                    :5 30
-                    :6 31
-                    :7 31
-                    :8 30
-                    :9 31
-                    :10 30
-                    :11 31})
+(def days-in-month {:0  ["January"   31]
+                    :1  ["February"  28]
+                    :2  ["March"     31]
+                    :3  ["April"     30]
+                    :4  ["May"       31]
+                    :5  ["June"      30]
+                    :6  ["July"      31]
+                    :7  ["August"    31]
+                    :8  ["September" 30]
+                    :9  ["October"   31]
+                    :10 ["November"  30]
+                    :11 ["December"  31]})
 
 
+(defn days-of-week []
+  (let [abr ["Mo" "Tu" "We" "Th" "Fr" "Sa" "Su"]]
+  (->> abr
+       (map #(identity [:th %]))
+       (cons :tr#days-of-week)
+       (vec))))
+      
 
 (defn- leap-year? [year]
   (letfn [(not-div-by? [n] (->> n (rem year) (zero?) (not)))]
@@ -32,26 +39,35 @@
          date  (.getDate current-date)
          month (.getMonth current-date)
          year  (.getFullYear current-date)
-         days  (+ (-> month
-                     (str)
-                     (keyword)
-                     (days-in-month))
-                  (if (and (= month 1) (leap-year? year))
-                  1
-                  0))         
+         [month-name days]  (-> month
+                                (str)
+                                (keyword)
+                                (days-in-month))
+         total-days (if (and (= 1 month) (leap-year? year))
+                      (inc days)
+                      days)
          head (rem (Math/abs (- date day)) 7)
-         tail (rem (- days (- 7 head)) 7)
+         tail (rem (- total-days (- 7 head)) 7)
          head-dummies (repeat (rem 7 (- 7 head)) nil)
          tail-dummies (repeat (- 7 tail) nil)
          weeks (concat [(->> (take head (range 1 8))
                              (into head-dummies))]
-                       (partition 7 (range (inc head) (inc (- days tail))))
-                       [(concat (range (inc (- days tail)) (inc days)) tail-dummies)])]
-     (->> weeks
+                       (partition 7
+                                  (range (inc head) (inc (- total-days tail))))
+                       [(concat
+                         (range (inc (- total-days tail)) (inc total-days))
+                         tail-dummies)])
+         headings (days-of-week)]
+     (do
+       (println headings)
+       [:table#month
+        [:caption month-name " " year]
+        (->> weeks
           (filter not-empty)
           (map week)
+          (cons headings)
           (cons :tbody)
-          (vec))))
+          (vec))])))
 
 (defn date-cell [date]
   [:td.day date])
@@ -61,7 +77,7 @@
       (cons :tr)
       (vec)))
 
-(reagent/render-component [:table#month [current-month]]
+(reagent/render-component [current-month]
                           (. js/document (getElementById "app")))
 
 

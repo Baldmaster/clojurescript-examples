@@ -1,16 +1,27 @@
 /* some style */
-.week{
-    background-color: blue;
-    width: 300px;
-    height: 30px;
-}
 
-.day{
+.day {
     vertical-align: top;
     text-align: left;
 }
 
-#month{
-    width: 400px;
+#month {
+    width: 420px;
     height: 280px;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+#month caption {
+    text-align: center;
+    font-size: 20px;
+}
+
+#month tbody td {
+    border: 1px solid gray;
+    width: 60px;
+}
+
+#days-of-week {
+    text-align: left;
 }
