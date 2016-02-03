@@ -3,12 +3,6 @@
 
 (enable-console-print!)
 
-(println "Edits to this text should show up in your developer console.")
-
-;; define your app data so that it doesn't get over-written on reload
-
-(defonce app-state (atom {:text "Hello world!"}))
-
 (def days-in-month {:0 31
                     :1 28
                     :2 31
@@ -24,7 +18,7 @@
 
 
 
-(defn leap-year? [year]
+(defn- leap-year? [year]
   (letfn [(not-div-by? [n] (->> n (rem year) (zero?) (not)))]
    (cond
     (not-div-by? 4) false
@@ -34,28 +28,36 @@
 
 (defn current-month []
    (let [current-date (js/Date.)
-         day (.getDay current-date)
-         date (.getDate current-date)
+         day   (.getDay current-date)
+         date  (.getDate current-date)
          month (.getMonth current-date)
-         days (-> month (str) (keyword) (days-in-month))
+         year  (.getFullYear current-date)
+         days  (+ (-> month
+                     (str)
+                     (keyword)
+                     (days-in-month))
+                  (if (and (= month 1) (leap-year? year))
+                  1
+                  0))         
          head (rem (Math/abs (- date day)) 7)
-         tail (rem (- days (- 7 head)) 7)]
-     
-     (->> (concat (take head (range 1 8))
-      (partition 7 (range (inc head) (inc (- days tail))))
-      (take tail (range 1 8)))
-         (map week-component)
-         (cons :tbody)
-         (vec))))
-         
-(defn hello-world []
-  [:h1 (:text @app-state)])
+         tail (rem (- days (- 7 head)) 7)
+         head-dummies (repeat (rem 7 (- 7 head)) nil)
+         tail-dummies (repeat (- 7 tail) nil)
+         weeks (concat [(->> (take head (range 1 8))
+                             (into head-dummies))]
+                       (partition 7 (range (inc head) (inc (- days tail))))
+                       [(concat (range (inc (- days tail)) (inc days)) tail-dummies)])]
+     (->> weeks
+          (filter not-empty)
+          (map week)
+          (cons :tbody)
+          (vec))))
 
-(defn date-component [date]
+(defn date-cell [date]
   [:td.day date])
 
-(defn week-component [dates]
-  (->> (map date-component dates)
+(defn week [dates]
+  (->> (map date-cell dates)
       (cons :tr)
       (vec)))
 
