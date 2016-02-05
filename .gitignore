@@ -10,6 +10,10 @@
 **/lib/
 **/lasses/
 **/out/
+**/log/
+**/.lein-env
+**/*.properties
+**/Procfile
 **/target/
 **/.lein-deps-sum
 **/.lein-repl-history
