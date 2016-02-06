@@ -41,15 +41,15 @@
   (let [name (atom "")
         message (atom "")]
     (fn []
-  [:div#message-form
-   [:p "name"]
-   [name-input name]
-   [:p "message"]
-   [message-input message]
-   [:br]
-   [:input {:type "submit"
-            :value "comment"
-            :onClick #(add-comment @name @message)}]])))
+      [:div#message-form
+       [:p "name"]
+       [name-input name]
+       [:p "message"]
+       [message-input message]
+       [:br]
+       [:input {:type "submit"
+                :value "comment"
+                :onClick #(add-comment @name @message)}]])))
 
 
 (reagent/render-component [:div [guestbook-comments] [(message-form)]]
