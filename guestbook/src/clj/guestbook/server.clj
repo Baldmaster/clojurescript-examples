@@ -29,6 +29,6 @@
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 10555))]
     (do
-      (if-not (.exists (java.io.File "./db.sq3"))
+      (if-not (.exists (java.io.File. "./db.sq3"))
         (db/create-guestbook-table))
       (run-jetty http-handler {:port port :join? false}))))

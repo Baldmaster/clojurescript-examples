@@ -1,6 +1,6 @@
 (ns guestbook.core
   (:require [reagent.core :as reagent :refer [atom]]
-            [ajax.core :refer [POST]]))
+            [ajax.core :refer [GET POST]]))
 
 (enable-console-print!)
 
@@ -16,6 +16,25 @@
                                   [{:keys [status status-text]}]
                                   (println status status-text))
                  :format :raw}))
+
+(defn load-comments
+  "Json input data expected"
+  []
+  (POST "/loadcomments" {:handler (fn [cmnts] (->> cmnts
+                                                   (.parse js/JSON)
+                                                   (js->cljs)
+                                                   (map assoc-keys)
+                                                   (reset! comments)))}))
+
+(defn assoc-keys
+  "Keywordize keys in associative collections
+   returns map
+   ['key' value ...] => {:key value ...}
+   {'key' value ...} => {:key value ...}"
+  [col]
+  (reduce (fn [acc [k v]]
+            (assoc acc (keyword k) v) {} col)))
+
 
 (defn guestbook-comments []
   [:ul
