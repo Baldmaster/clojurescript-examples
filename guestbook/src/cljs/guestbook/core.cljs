@@ -5,7 +5,7 @@
 (enable-console-print!)
 
 ;; define your app data so that it doesn't get over-written on reload
-(defonce comments (atom []))
+(def comments (atom []))
 
 (defn add-comment [name message]
   (POST "/save" {:params {:message message
@@ -22,9 +22,11 @@
   []
   (POST "/loadcomments" {:handler (fn [cmnts] (->> cmnts
                                                    (.parse js/JSON)
-                                                   (js->cljs)
+                                                   (js->clj)
                                                    (map assoc-keys)
+                                                   (vec)
                                                    (reset! comments)))}))
+
 
 (defn assoc-keys
   "Keywordize keys in associative collections
@@ -33,15 +35,17 @@
    {'key' value ...} => {:key value ...}"
   [col]
   (reduce (fn [acc [k v]]
-            (assoc acc (keyword k) v) {} col)))
+            (assoc acc (keyword k) v)) {} col))
 
 
 (defn guestbook-comments []
-  [:ul
-   (for [{:keys [name message]} @comments]
-     [:li
-      [:blockquote message]
-      [:p [:cite name]]])])
+  (let [_ (load-comments)]
+    (fn []
+      [:ul
+       (for [{:keys [name message]} @comments]
+         [:li
+          [:blockquote message]
+          [:p [:cite name]]])])))
 
 
 (defn name-input [value]
@@ -71,7 +75,7 @@
                 :onClick #(add-comment @name @message)}]])))
 
 
-(reagent/render-component [:div [guestbook-comments] [(message-form)]]
+(reagent/render-component [:div [(guestbook-comments)] [(message-form)]]
                           (. js/document (getElementById "app")))
 
 

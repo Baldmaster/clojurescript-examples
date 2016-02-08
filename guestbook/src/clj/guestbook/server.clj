@@ -8,6 +8,7 @@
             [environ.core :refer [env]]
             [clojure.pprint :refer [pprint]]
             [ring.adapter.jetty :refer [run-jetty]]
+            [cheshire.core :refer :all]
             [guestbook.db :as db])
   (:gen-class))
 
@@ -18,7 +19,11 @@
      :headers {"Content-Type" "text/html; charset=utf-8"}
      :body (io/input-stream (io/resource "public/index.html"))})
   (POST "/save" [name message] (db/save-message name message) {:status "ok"})
-  (resources "/"))
+  (POST "/loadcomments" _ _ {:status 200
+                             :headers {"Content-type" "text/plain"}
+                             :body (->> (db/read-guests)
+                                        (generate-string))})
+  (resources "/" ))
 
 (def http-handler
   (-> routes
